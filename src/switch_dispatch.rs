@@ -64,31 +64,31 @@ pub fn dispatch(sp: usize, ip: usize) -> f32 {
             match INSTRS[ip] {
                 Instr::Lit(value) => {
                     STACK[sp] = value;
-                    dispatch(sp + 1, ip + 1)
+                    become dispatch(sp + 1, ip + 1)
                 },
                 Instr::Add => {
                     let a = STACK[sp - 2];
                     let b = STACK[sp - 1];
                     STACK[sp - 2] = a + b;
-                    dispatch(sp - 1, ip + 1)
+                    become dispatch(sp - 1, ip + 1)
                 },
                 Instr::Sub => {
                     let a = STACK[sp - 2];
                     let b = STACK[sp - 1];
                     STACK[sp - 2] = a - b;
-                    dispatch(sp - 1, ip + 1)
+                    become dispatch(sp - 1, ip + 1)
                 },
                 Instr::Mul => {
                     let a = STACK[sp - 2];
                     let b = STACK[sp - 1];
                     STACK[sp - 2] = a * b;
-                    dispatch(sp - 1, ip + 1)
+                    become dispatch(sp - 1, ip + 1)
                 },
                 Instr::Div => {
                     let a = STACK[sp - 2];
                     let b = STACK[sp - 1];
                     STACK[sp - 2] = a / b;
-                    dispatch(sp - 1, ip + 1)
+                    become dispatch(sp - 1, ip + 1)
                 },
             }
         }

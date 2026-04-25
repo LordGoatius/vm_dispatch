@@ -1,3 +1,6 @@
+//! In order to perform `tailcall` the way Scala does, I use [`tramp`]
+use tramp::Rec;
+
 #[repr(u32)]
 #[derive(Clone, Copy)]
 pub enum ByteCode {
@@ -32,7 +35,7 @@ static mut STACK: &mut [f32] = &mut [0.0; STACK_SIZE];
 //       tailcall div()
 //   }
 // }
-pub fn dispatch(instr: ByteCode) -> f32 {
+pub fn dispatch(instr: ByteCode) -> Rec<f32> {
     match instr {
         ByteCode::Lit(val) => lit(val),
         ByteCode::Add      => add(),
@@ -49,15 +52,15 @@ pub fn dispatch(instr: ByteCode) -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn lit(val: f32) -> f32 {
+fn lit(val: f32) -> Rec<f32> {
     unsafe {
         STACK[SP] = val;
         SP += 1;
         IP += 1;
         if IP == INSTRS.len() {
-            STACK[SP - 1]
+            rec_ret!(STACK[SP - 1])
         } else {
-            dispatch(INSTRS[IP])
+            rec_call!(dispatch(INSTRS[IP]))
         }
     }    
 }
@@ -72,7 +75,7 @@ fn lit(val: f32) -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn add() -> f32 {
+fn add() -> Rec<f32> {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
@@ -80,9 +83,9 @@ fn add() -> f32 {
         SP -= 1;
         IP += 1;
         if IP == INSTRS.len() {
-            STACK[SP - 1]
+            rec_ret!(STACK[SP - 1])
         } else {
-            dispatch(INSTRS[IP])
+            rec_call!(dispatch(INSTRS[IP]))
         }
     }
 }
@@ -96,7 +99,7 @@ fn add() -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn sub() -> f32 {
+fn sub() -> Rec<f32> {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
@@ -104,9 +107,9 @@ fn sub() -> f32 {
         SP -= 1;
         IP += 1;
         if IP == INSTRS.len() {
-            STACK[SP - 1]
+            rec_ret!(STACK[SP - 1])
         } else {
-            dispatch(INSTRS[IP])
+            rec_call!(dispatch(INSTRS[IP]))
         }
     }
 }
@@ -121,7 +124,7 @@ fn sub() -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn mul() -> f32 {
+fn mul() -> Rec<f32> {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
@@ -129,9 +132,9 @@ fn mul() -> f32 {
         SP -= 1;
         IP += 1;
         if IP == INSTRS.len() {
-            STACK[SP - 1]
+            rec_ret!(STACK[SP - 1])
         } else {
-            dispatch(INSTRS[IP])
+            rec_call!(dispatch(INSTRS[IP]))
         }
     }
 }
@@ -145,7 +148,8 @@ fn mul() -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn div() -> f32 {
+//
+fn div() -> Rec<f32> {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
@@ -153,9 +157,9 @@ fn div() -> f32 {
         SP -= 1;
         IP += 1;
        if IP == INSTRS.len() {
-            STACK[SP - 1]
+            rec_ret!(STACK[SP - 1])
         } else {
-            dispatch(INSTRS[IP])
+            rec_call!(dispatch(INSTRS[IP]))
         }
     }
 }

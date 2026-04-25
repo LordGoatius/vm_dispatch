@@ -1,3 +1,6 @@
+//! In order to perform `tailcall` the way Scala does, I use [`tramp`]
+use tramp::Rec;
+
 // I am using static muts because this most directly
 // translates the given code. It is not recommended for
 // actual use, but this is a low-consquence project.
@@ -30,7 +33,7 @@ struct Lit(f32);
 // I'm not sure how Rust's Fn trait internals work here...
 // You gotta write a macro for ts to work.
 impl FnOnce<()> for Lit {
-    type Output = f32;
+    type Output = Rec<f32>;
 
     extern "rust-call" fn call_once(self, _args: ()) -> Self::Output {
         todo!()
@@ -50,9 +53,9 @@ impl Fn<()> for Lit {
             SP += 1;
             IP += 1;
             if IP == INSTRS.len() {
-                STACK[SP - 1]                
+                rec_ret!(STACK[SP - 1])                
             } else {
-                INSTRS[IP]()
+                rec_call!(INSTRS[IP]())
             }
         }
     }
@@ -76,7 +79,7 @@ struct Add;
 // This is all me.
 // I'm not sure how Rust's Fn trait internals work here...
 impl FnOnce<()> for Add {
-    type Output = f32;
+    type Output = Rec<f32>;
 
     extern "rust-call" fn call_once(self, _args: ()) -> Self::Output {
         todo!()
@@ -98,9 +101,9 @@ impl Fn<()> for Add {
             SP -= 1;
             IP += 1;
             if IP == INSTRS.len() {
-                STACK[SP - 1]
+                rec_ret!(STACK[SP - 1])
             } else {
-                INSTRS[IP]()
+                rec_call!(INSTRS[IP]())
             }
         }
     }
@@ -124,7 +127,7 @@ struct Sub;
 // This is all me.
 // I'm not sure how Rust's Fn trait internals work here...
 impl FnOnce<()> for Sub {
-    type Output = f32;
+    type Output = Rec<f32>;
 
     extern "rust-call" fn call_once(self, _args: ()) -> Self::Output {
         todo!()
@@ -146,9 +149,9 @@ impl Fn<()> for Sub {
             SP -= 1;
             IP += 1;
             if IP == INSTRS.len() {
-                STACK[SP - 1]
+                rec_ret!(STACK[SP - 1])
             } else {
-                INSTRS[IP]()
+                rec_call!(INSTRS[IP]())
             }
         }
     }
@@ -171,7 +174,7 @@ struct Mul;
 // This is all me.
 // I'm not sure how Rust's Fn trait internals work here...
 impl FnOnce<()> for Mul {
-    type Output = f32;
+    type Output = Rec<f32>;
 
     extern "rust-call" fn call_once(self, _args: ()) -> Self::Output {
         todo!()
@@ -193,9 +196,9 @@ impl Fn<()> for Mul {
             SP -= 1;
             IP += 1;
             if IP == INSTRS.len() {
-                STACK[SP - 1]                
+                rec_ret!(STACK[SP - 1])                
             } else {
-                INSTRS[IP]()
+                rec_call!(INSTRS[IP]())
             }
         }
     }
@@ -218,7 +221,7 @@ struct Div;
 // This is all me.
 // I'm not sure how Rust's Fn trait internals work here...
 impl FnOnce<()> for Div {
-    type Output = f32;
+    type Output = Rec<f32>;
 
     extern "rust-call" fn call_once(self, _args: ()) -> Self::Output {
         todo!()
@@ -240,16 +243,16 @@ impl Fn<()> for Div {
             SP -= 1;
             IP += 1;
             if IP == INSTRS.len() {
-                STACK[SP - 1]                
+                rec_ret!(STACK[SP - 1])                
             } else {
-                INSTRS[IP]()
+                rec_call!(INSTRS[IP]())
             }
         }
     }
 }
 
 // val instructions: Array[Op] = ???
-pub static mut INSTRS: &[&dyn Fn() -> f32] = {
+pub static mut INSTRS: &[&dyn Fn() -> Rec<f32>] = {
     &[
     &Lit(1.0),
     &Lit(1.0),

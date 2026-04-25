@@ -206,7 +206,7 @@ pub fn dispatch(ip: usize) -> f32 {
             STACK[SP - 1]        
         } else {
             INSTRS[ip]();
-            dispatch(ip + 1)
+            become dispatch(ip + 1)
         }
     }
 }
