@@ -102,31 +102,49 @@ pub mod bench {
 
     #[bench]
     fn indirect_tramp(b: &mut Bencher) {
+        for _ in 0..20 {
+            std::hint::black_box(crate::indirect_threaded_tramp());
+        }
         b.iter(crate::indirect_threaded_tramp)
     }
 
     #[bench]
     fn direct_tramp(b: &mut Bencher) {
+        for _ in 0..20 {
+            std::hint::black_box(crate::direct_threaded_tramp());
+        }
         b.iter(crate::direct_threaded_tramp)
     }
 
     #[bench]
     fn indirect(b: &mut Bencher) {
+        for _ in 0..20 {
+            std::hint::black_box(crate::indirect_threaded());
+        }
         b.iter(crate::indirect_threaded)
     }
 
     #[bench]
     fn direct(b: &mut Bencher) {
+        for _ in 0..20 {
+            std::hint::black_box(crate::direct_threaded());
+        }
         b.iter(crate::direct_threaded)
     }
 
     #[bench]
     fn subroutine(b: &mut Bencher) {
+        for _ in 0..20 {
+            std::hint::black_box(crate::subroutine_dispatch());
+        }
         b.iter(crate::subroutine_dispatch)
     }
 
     #[bench]
     fn switch(b: &mut Bencher) {
+        for _ in 0..20 {
+            std::hint::black_box(crate::switch_dispatch());
+        }
         b.iter(crate::switch_dispatch)
     }
 

@@ -156,6 +156,10 @@ pub mod bench {
     
     #[bench]
     fn direct_machine(b: &mut Bencher) {
+        for _ in 0..20 {
+            let mut machine = Machine::default();
+            super::direct::begin(&mut machine)
+        }
         b.iter(|| {
             let mut machine = Machine::default();
             super::direct::begin(&mut machine)
@@ -164,6 +168,10 @@ pub mod bench {
 
     #[bench]
     fn direct_machine_2(b: &mut Bencher) {
+        for _ in 0..20 {
+            let mut machine = Machine::default();
+            super::direct_better::run(&mut machine)
+        }
         b.iter(|| {
             let mut machine = Machine::default();
             super::direct_better::run(&mut machine)
@@ -172,6 +180,10 @@ pub mod bench {
 
     #[bench]
     fn switch_machine(b: &mut Bencher) {
+        for _ in 0..20 {
+            let mut machine = Machine::default();
+            super::switch::begin(&mut machine)
+        }
         b.iter(|| {
             let mut machine = Machine::default();
             super::switch::begin(&mut machine)
