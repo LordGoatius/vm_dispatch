@@ -29,6 +29,7 @@ fn indirect_threaded_tramp() {
         SP = 0;
     }
     let value = tramp(dispatch(INSTRS[0]));
+    #[cfg(not(test))]
     println!("{}", value);
 }
 
@@ -42,6 +43,7 @@ fn direct_threaded_tramp() {
     let value = unsafe {
         tramp(INSTRS[0]())
     };
+    #[cfg(not(test))]
     println!("{}", value);
 }
 
@@ -53,6 +55,7 @@ fn indirect_threaded() {
         SP = 0;
     }
     let value = dispatch(INSTRS[0]);
+    #[cfg(not(test))]
     println!("{}", value);
 }
 
@@ -66,6 +69,7 @@ fn direct_threaded() {
     let value = unsafe {
         INSTRS[0]()
     };
+    #[cfg(not(test))]
     println!("{}", value);
 }
 
@@ -76,6 +80,7 @@ fn subroutine_dispatch() {
         SP = 0;
     }
     let value = dispatch(0);
+    #[cfg(not(test))]
     println!("{}", value);
 }
 
@@ -86,6 +91,7 @@ fn switch_dispatch() {
         SP = 0;
     }
     let value = dispatch(0, 0);
+    #[cfg(not(test))]
     println!("{}", value);
 }
 
