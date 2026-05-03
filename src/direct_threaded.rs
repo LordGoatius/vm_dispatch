@@ -11,6 +11,13 @@ pub static mut IP: usize = 0;
 const STACK_SIZE: usize = 32;
 static mut STACK: &mut [f32] = &mut [0.0; STACK_SIZE];
 
+pub trait Op: Fn() -> f32 {}
+impl Op for Lit {}
+impl Op for Sub {}
+impl Op for Add {}
+impl Op for Mul {}
+impl Op for Div {}
+
 // // An operation is a function () => Unit
 // sealed abstract class Op extends Function0[Unit]
 // final case class Lit(value: Double) extends Op {
@@ -249,7 +256,7 @@ impl Fn<()> for Div {
 }
 
 // val instructions: Array[Op] = ???
-pub static mut INSTRS: &[&dyn Fn() -> f32] = {
+pub static mut INSTRS: &[&dyn Op] = {
     &[
     &Lit(1.0),
     &Lit(1.0),

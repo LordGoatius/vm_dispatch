@@ -6,6 +6,12 @@
 #![allow(static_mut_refs)]
 #[macro_use] extern crate tramp;
 
+// TODO: Test with encoding/decoding machine.
+// Make it a register machine too? Should be easy to create one machine
+// and translate it into the different dispatch methods.
+
+pub mod machine;
+
 pub mod indirect_threaded;
 pub mod direct_threaded;
 pub mod indirect_threaded_tramp;
