@@ -79,7 +79,7 @@ pub const fn instr(op: Op, rd: Reg, r1: Reg, imm: u16) -> Instr {
     Instr(op | rd | r1 | imm)
 }
 
-static INSTRS: [Instr; 256] = {
+const INSTRS: [Instr; 256] = {
     let mut instrs = [instr(Op::Halt, 0, 0, 0); 256];
     let n = 6;
     // 0 add r1, r1, 1
@@ -91,8 +91,14 @@ static INSTRS: [Instr; 256] = {
     // 5   mul r3, r2, 0
     // 6   sub r2, r1, 0
     // 7   bleq r4, r4, loop
+    //   loop_15:
+    // 8   add r5, r5, 15
+    //   cont:
+    // 9   bleq r5, r4, hlt
+    // 10  sub r5, r4, 1
+    // 11  bleq r4, r4, cont
     //   hlt:
-    // 8   hlt
+    // 12   hlt
     instrs[0] = instr(Op::Add, 1, 1, 1);
     instrs[1] = instr(Op::Add, 2, 2, n);
     instrs[2] = instr(Op::Add, 3, 3, 1);
@@ -101,7 +107,19 @@ static INSTRS: [Instr; 256] = {
     instrs[5] = instr(Op::Mul, 3, 2, 0);
     instrs[6] = instr(Op::Sub, 2, 1, 0);
     instrs[7] = instr(Op::Bleq, 4, 4, 4);
-    instrs[8] = instr(Op::Halt, 0, 0, 0);
+
+    instrs[8] = instr(Op::Add, 5, 5, 15);
+    instrs[9] = instr(Op::Bleq, 5, 4, 12);
+    instrs[10] = instr(Op::Sub, 5, 1, 0);
+    instrs[11] = instr(Op::Bleq, 4, 4, 9);
+    instrs[12] = instr(Op::Add, 1, 2, 3);
+    instrs[13] = instr(Op::Add, 1, 2, 3);
+    instrs[14] = instr(Op::Add, 1, 2, 3);
+    instrs[15] = instr(Op::Add, 1, 2, 3);
+    instrs[16] = instr(Op::Add, 1, 2, 3);
+    instrs[17] = instr(Op::Add, 1, 2, 3);
+    instrs[18] = instr(Op::Add, 1, 2, 3);
+    instrs[19] = instr(Op::Halt, 0, 0, 0);
 
     instrs
 };
@@ -137,6 +155,7 @@ pub mod tests {
         let mut machine = Machine::default();
         direct_better::run(&mut machine);
         assert_eq!(machine.regs[3], 720);
+        panic!()
     }
 
     #[test]
