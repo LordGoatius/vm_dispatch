@@ -1,4 +1,6 @@
 //! Alternative dispatch attempts in Rust, from https://noelwelsh.com/posts/understanding-vm-dispatch/
+#![expect(incomplete_features)]
+#![allow(unused)]
 #![feature(unboxed_closures)]
 #![feature(fn_traits)]
 #![feature(explicit_tail_calls)]

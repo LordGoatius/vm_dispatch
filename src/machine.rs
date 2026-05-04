@@ -3,8 +3,9 @@ use bitstruct::{bitstruct, FromRaw};
 // TODO: Implement baseline register machine using match
 
 pub mod direct;
-pub mod direct_better;
+pub mod direct_two;
 pub mod indirect;
+pub mod subroutine;
 pub mod switch;
 
 pub struct Machine {
@@ -126,8 +127,11 @@ const INSTRS: [Instr; 256] = {
 
 #[cfg(test)]
 pub mod tests {
-    use crate::machine::{Machine, direct, direct_better, switch};
-    use crate::machine::{Op, instr};
+    use std::arch::x86_64;
+
+    use crate::machine::{
+        Machine, Op, direct, direct_two, indirect, instr, subroutine, switch
+    };
 
     #[test]
     fn inst_test() {
@@ -153,16 +157,48 @@ pub mod tests {
     #[test]
     fn direct_machine_2() {
         let mut machine = Machine::default();
-        direct_better::run(&mut machine);
+        direct_two::run(&mut machine);
         assert_eq!(machine.regs[3], 720);
-        panic!()
     }
 
     #[test]
     fn switch_machine() {
         let mut machine = Machine::default();
-        switch::begin(&mut machine);
+        switch::run(&mut machine);
         assert_eq!(machine.regs[3], 720);
+    }
+
+    #[test]
+    fn indirect_machine() {
+        let mut machine = Machine::default();
+        indirect::run(&mut machine);
+        assert_eq!(machine.regs[3], 720);
+    }
+
+    #[test]
+    fn subroutine_machine() {
+        let mut machine = Machine::default();
+        subroutine::run(&mut machine);
+        assert_eq!(machine.regs[3], 720);
+    }
+
+    #[test]
+    fn readcycle() {
+        let begin;
+        let end;
+        let mut machine = Machine::default();
+        begin = unsafe { x86_64::_rdtsc() };
+        super::switch::run(&mut machine);
+        end = unsafe { x86_64::_rdtsc() };
+        println!("{}", end-begin);
+
+        let begin;
+        let end;
+        let mut machine = Machine::default();
+        begin = unsafe { x86_64::_rdtsc() };
+        super::direct_two::run(&mut machine);
+        end = unsafe { x86_64::_rdtsc() };
+        println!("{}", end-begin);
     }
 }
 
@@ -189,11 +225,35 @@ pub mod bench {
     fn direct_machine_2(b: &mut Bencher) {
         for _ in 0..20 {
             let mut machine = Machine::default();
-            super::direct_better::run(&mut machine)
+            super::direct_two::run(&mut machine)
         }
         b.iter(|| {
             let mut machine = Machine::default();
-            super::direct_better::run(&mut machine)
+            super::direct_two::run(&mut machine)
+        });
+    }
+
+    #[bench]
+    fn indirect_machine(b: &mut Bencher) {
+        for _ in 0..20 {
+            let mut machine = Machine::default();
+            super::indirect::run(&mut machine)
+        }
+        b.iter(|| {
+            let mut machine = Machine::default();
+            super::indirect::run(&mut machine)
+        });
+    }
+
+    #[bench]
+    fn subroutine_machine(b: &mut Bencher) {
+        for _ in 0..20 {
+            let mut machine = Machine::default();
+            super::subroutine::run(&mut machine)
+        }
+        b.iter(|| {
+            let mut machine = Machine::default();
+            super::subroutine::run(&mut machine)
         });
     }
 
@@ -201,11 +261,11 @@ pub mod bench {
     fn switch_machine(b: &mut Bencher) {
         for _ in 0..20 {
             let mut machine = Machine::default();
-            super::switch::begin(&mut machine)
+            super::switch::run(&mut machine)
         }
         b.iter(|| {
             let mut machine = Machine::default();
-            super::switch::begin(&mut machine)
+            super::switch::run(&mut machine)
         });
     }
 }
