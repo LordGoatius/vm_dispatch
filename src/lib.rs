@@ -3,6 +3,7 @@
 #![allow(unused)]
 #![feature(unboxed_closures)]
 #![feature(fn_traits)]
+#![feature(rust_preserve_none_cc)]
 #![feature(explicit_tail_calls)]
 #![cfg_attr(test, feature(test))]
 #![allow(static_mut_refs)]

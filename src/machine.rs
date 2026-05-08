@@ -4,14 +4,69 @@ use bitstruct::{bitstruct, FromRaw};
 
 pub mod direct;
 pub mod direct_two;
+pub mod direct_full;
 pub mod indirect;
 pub mod subroutine;
 pub mod switch;
 
+pub type Pc = u8;
+pub type Regs = [u16; 16];
+pub type Instrs = [Instr; 256];
+
 pub struct Machine {
     regs: [u16; 16],
-    ip: usize,
     instrs: [Instr; 256],
+    ip: usize,
+}
+
+#[derive(Debug)]
+pub struct DirectMachine {
+    regs: [u16; 16],
+    instrs: [Instr; 256],
+}
+
+impl DirectMachine {
+    #[inline(always)]
+    pub fn add(&mut self, pc: Pc, rd: Reg, imm: u16, r1v: u16, rdv: u16) -> Pc {
+        self.regs[rd as usize] = rdv.wrapping_add(r1v.wrapping_add(imm));
+        pc + 1
+    }
+
+    #[inline(always)]
+    pub fn sub(&mut self, pc: Pc, rd: Reg, imm: u16, r1v: u16, rdv: u16) -> Pc {
+        self.regs[rd as usize] = rdv.wrapping_sub(r1v.wrapping_add(imm));
+        pc + 1
+    }
+
+    #[inline(always)]
+    pub fn mul(&mut self, pc: Pc, rd: Reg, imm: u16, r1v: u16, rdv: u16) -> Pc {
+        self.regs[rd as usize] = rdv.wrapping_mul(r1v.wrapping_add(imm));
+        pc + 1
+    }
+
+    #[inline(always)]
+    pub fn div(&mut self, pc: Pc, rd: Reg, imm: u16, r1v: u16, rdv: u16) -> Pc {
+        self.regs[rd as usize] = rdv.wrapping_div(r1v.wrapping_add(imm));
+        pc + 1
+    }
+
+    #[inline(always)]
+    pub fn bgt(&mut self, pc: Pc, rd: Reg, imm: u16, r1v: u16, rdv: u16) -> Pc {
+        if rdv > r1v {
+            imm as u8
+        } else {
+            pc + 1
+        }
+    }
+
+    #[inline(always)]
+    pub fn blq(&mut self, pc: Pc, rd: Reg, imm: u16, r1v: u16, rdv: u16) -> Pc {
+        if rdv <= r1v {
+            imm as u8
+        } else {
+            pc + 1
+        }
+    }
 }
 
 impl Default for Machine {
@@ -19,6 +74,15 @@ impl Default for Machine {
         Self {
             regs: [0; 16],
             ip: 0,
+            instrs: INSTRS,
+        }
+    }
+}
+
+impl Default for DirectMachine {
+    fn default() -> Self {
+        Self {
+            regs: [0; 16],
             instrs: INSTRS,
         }
     }
@@ -60,7 +124,7 @@ impl From<Op> for u8 {
 }
 
 bitstruct! {
-    #[derive(Clone, Copy, Default)]
+    #[derive(Clone, Copy, Default, Debug)]
     pub struct Instr(u16) {
         op: Op = 0..4;
         rd: u8 = 4..8;
@@ -113,14 +177,7 @@ const INSTRS: [Instr; 256] = {
     instrs[9] = instr(Op::Bleq, 5, 4, 12);
     instrs[10] = instr(Op::Sub, 5, 1, 0);
     instrs[11] = instr(Op::Bleq, 4, 4, 9);
-    instrs[12] = instr(Op::Add, 1, 2, 3);
-    instrs[13] = instr(Op::Add, 1, 2, 3);
-    instrs[14] = instr(Op::Add, 1, 2, 3);
-    instrs[15] = instr(Op::Add, 1, 2, 3);
-    instrs[16] = instr(Op::Add, 1, 2, 3);
-    instrs[17] = instr(Op::Add, 1, 2, 3);
-    instrs[18] = instr(Op::Add, 1, 2, 3);
-    instrs[19] = instr(Op::Halt, 0, 0, 0);
+    instrs[12] = instr(Op::Halt, 0, 0, 0);
 
     instrs
 };
@@ -130,7 +187,7 @@ pub mod tests {
     use std::arch::x86_64;
 
     use crate::machine::{
-        Machine, Op, direct, direct_two, indirect, instr, subroutine, switch
+        DirectMachine, Machine, Op, direct, direct_full, direct_two, indirect, instr, subroutine, switch
     };
 
     #[test]
@@ -158,6 +215,13 @@ pub mod tests {
     fn direct_machine_2() {
         let mut machine = Machine::default();
         direct_two::run(&mut machine);
+        assert_eq!(machine.regs[3], 720);
+    }
+
+    #[test]
+    fn direct_machine_full() {
+        let machine = DirectMachine::default();
+        let (machine, _) = direct_full::run(machine);
         assert_eq!(machine.regs[3], 720);
     }
 
@@ -200,6 +264,14 @@ pub mod tests {
         end = unsafe { x86_64::_rdtsc() };
         println!("{}", end-begin);
     }
+
+    #[test]
+    fn direct_machine_exception() {
+        let mut machine = Machine::default();
+        machine.instrs[0..2].copy_from_slice(&[instr(Op::Div, 1, 1, 0), instr(Op::Halt, 0, 0, 0)]);
+        direct_two::run(&mut machine);
+    }
+
 }
 
 #[cfg(test)]
@@ -207,7 +279,7 @@ pub mod bench {
     extern crate test;
     use test::Bencher;
 
-    use crate::machine::Machine;
+    use crate::machine::{DirectMachine, Machine};
     
     #[bench]
     fn direct_machine(b: &mut Bencher) {
@@ -230,6 +302,18 @@ pub mod bench {
         b.iter(|| {
             let mut machine = Machine::default();
             super::direct_two::run(&mut machine)
+        });
+    }
+
+    #[bench]
+    fn direct_machine_full(b: &mut Bencher) {
+        for _ in 0..20 {
+            let machine = DirectMachine::default();
+            let (machine, _) = super::direct_full::run(machine);
+        }
+        b.iter(|| {
+            let machine = DirectMachine::default();
+            let (machine, _) = super::direct_full::run(machine);
         });
     }
 
