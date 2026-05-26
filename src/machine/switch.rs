@@ -8,7 +8,7 @@ pub fn run(machine: &mut Machine) {
         let rdv = machine.regs[rd];
         let r1v = machine.regs[r1];
         let imm = instr.imm();
-        machine.ip = std::hint::black_box(match instr.op() {
+        machine.ip = match instr.op() {
             Op::Halt => return,
             Op::Add => {
                 machine.regs[rd] = rdv + (r1v + imm);
@@ -40,6 +40,6 @@ pub fn run(machine: &mut Machine) {
                     machine.ip + 1
                 }
             },
-        });
+        };
     }
 }

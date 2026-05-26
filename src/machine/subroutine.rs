@@ -76,7 +76,6 @@ fn bgt(machine: &mut Machine, instr: Instr) -> usize {
     } else {
         machine.ip + 1
     }
-    
 }
 
 fn blq(machine: &mut Machine, instr: Instr) -> usize {
@@ -96,5 +95,3 @@ fn blq(machine: &mut Machine, instr: Instr) -> usize {
 fn halt(_machine: &mut Machine, _instr: Instr) -> usize {
     return 0;
 }
-
-

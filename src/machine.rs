@@ -1,7 +1,5 @@
 use bitstruct::{bitstruct, FromRaw};
 
-// TODO: Implement baseline register machine using match
-
 pub mod direct;
 pub mod direct_two;
 pub mod direct_full;
