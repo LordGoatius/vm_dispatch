@@ -34,11 +34,11 @@ static mut STACK: &mut [f32] = &mut [0.0; STACK_SIZE];
 // }
 pub fn dispatch(instr: ByteCode) -> f32 {
     match instr {
-        ByteCode::Lit(val) => lit(val),
-        ByteCode::Add      => add(),
-        ByteCode::Sub      => sub(),
-        ByteCode::Mul      => mul(),
-        ByteCode::Div      => div(),
+        ByteCode::Lit(val) => become lit(instr),
+        ByteCode::Add      => become add(instr),
+        ByteCode::Sub      => become sub(instr),
+        ByteCode::Mul      => become mul(instr),
+        ByteCode::Div      => become div(instr),
     }
 }
 
@@ -49,7 +49,8 @@ pub fn dispatch(instr: ByteCode) -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn lit(val: f32) -> f32 {
+fn lit(instr: ByteCode) -> f32 {
+    let ByteCode::Lit(val) = instr else { panic!() };
     unsafe {
         STACK[SP] = val;
         SP += 1;
@@ -72,7 +73,7 @@ fn lit(val: f32) -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn add() -> f32 {
+fn add(_instr: ByteCode) -> f32 {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
@@ -96,7 +97,7 @@ fn add() -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn sub() -> f32 {
+fn sub(_instr: ByteCode) -> f32 {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
@@ -121,7 +122,7 @@ fn sub() -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn mul() -> f32 {
+fn mul(_instr: ByteCode) -> f32 {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
@@ -145,7 +146,7 @@ fn mul() -> f32 {
 //   if ip == instructions.size then stack(sp - 1)
 //   else tailcall dispatch(instruction(ip))
 // }
-fn div() -> f32 {
+fn div(_instr: ByteCode) -> f32 {
     unsafe {
         let a = STACK[SP - 1];
         let b = STACK[SP - 2];
